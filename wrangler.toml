@@ -1,0 +1,40 @@
+name = "hiilee-gift"
+main = "src/worker.js"
+compatibility_date = "2026-09-01"
+
+# Static landing page + images. API routes run the Worker first.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+# Create with: npx wrangler d1 create hiilee-gift  → paste the database_id below
+[[d1_databases]]
+binding = "DB"
+database_name = "hiilee-gift"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[vars]
+UNIT_PRICE = "389000"
+REFERRAL_DISCOUNT = "20000"
+MAX_QUANTITY = "50"
+ORDER_DEADLINE = "2026-10-15T23:59:59+07:00"
+TRANSFER_PREFIX = "HIILEE"
+
+# Referral codes: add rows to the referral_codes table, and/or list them here (comma-separated).
+REFERRAL_CODES = ""
+# "true" = accept ANY non-empty code (same as the mockup). Keep "false" in production.
+ACCEPT_ANY_REFERRAL = "false"
+
+# VietQR bank details for the payment QR (bank short name or BIN, see https://api.vietqr.io/v2/banks)
+BANK_ID = ""            # e.g. "vcb", "tcb", "mb", "970436"
+BANK_ACCOUNT_NO = ""
+BANK_ACCOUNT_NAME = ""  # e.g. "CONG TY TNHH SELF HIIL"
+BANK_NAME = ""          # label shown under the QR, e.g. "Vietcombank"
+VIETQR_TEMPLATE = "compact2"
+# Fallback if you'd rather upload a fixed QR image to /public/img (amount not pre-filled)
+STATIC_QR_URL = ""
+
+# Secrets (set with `npx wrangler secret put <NAME>`, never commit them):
+#   ADMIN_TOKEN          required for /api/admin/*
+#   NOTIFY_WEBHOOK_URL   optional — receives a JSON POST for every new order
