@@ -88,7 +88,7 @@ The signature option now covers all 3 books, so the FAQ placeholder "Cần xác 
 
 ## Payment QR
 
-`public/img/bank-qr.jpg` is the Techcombank VietQR from the company's bank app. The bank name, account number and holder are printed under it (`BANK_*` in `wrangler.toml`).
+`public/img/bank-qr.jpg` (389.000đ) and `public/img/bank-qr-2.jpg` (369.000đ, shown when a referral code is applied) are Techcombank VietQRs from the company's bank app, each with the note "Qua tang hanh phuc". The bank name, account number and holder are printed under it (`BANK_*` in `wrangler.toml`).
 
 ## Book preview
 

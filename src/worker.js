@@ -130,7 +130,7 @@ async function handleCreateOrder(request, env, ctx) {
   }
 
   const transferNote = `${transferPrefix} ${orderCode}`;
-  const payment = buildPayment(env, total, transferNote);
+  const payment = buildPayment(env, total, transferNote, !!referral);
   const result = { orderCode, total, transferNote, qrUrl: payment.qrUrl, bank: payment.bankLabel,
     bankName: env.BANK_NAME || null, accountNo: env.BANK_ACCOUNT_NO || null, accountName: env.BANK_ACCOUNT_NAME || null };
 
@@ -183,10 +183,12 @@ function validate(b, c) {
 
 /* ---------------- payment ---------------- */
 
-function buildPayment(env, amount, note) {
+function buildPayment(env, amount, note, withReferral = false) {
   const bankLabel = [env.BANK_NAME || (env.BANK_ID || "").toUpperCase(), env.BANK_ACCOUNT_NO, env.BANK_ACCOUNT_NAME].filter(Boolean).join(" · ") || null;
   // A fixed QR image (e.g. the bank app's own QR) takes priority when STATIC_QR_URL is set
-  if (env.STATIC_QR_URL || !env.BANK_ID || !env.BANK_ACCOUNT_NO) return { qrUrl: env.STATIC_QR_URL || null, bankLabel };
+  // Fixed QR images from the bank app: one for the full price, one for orders with a referral code
+  const staticQr = (withReferral && env.STATIC_QR_URL_REFERRAL) || env.STATIC_QR_URL;
+  if (staticQr || !env.BANK_ID || !env.BANK_ACCOUNT_NO) return { qrUrl: staticQr || null, bankLabel };
   const tpl = env.VIETQR_TEMPLATE || "compact2";
   const qs = new URLSearchParams({ amount: String(amount), addInfo: note });
   if (env.BANK_ACCOUNT_NAME) qs.set("accountName", env.BANK_ACCOUNT_NAME);

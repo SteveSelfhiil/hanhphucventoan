@@ -27,9 +27,10 @@ REFERRAL_CODES = "HanhNhan,YenDieu,KhanhLy,Sunshine,LeNhon,KimBao,TuyetNgan,Tran
 # "true" = accept ANY non-empty code (same as the mockup). Keep "false" in production.
 ACCEPT_ANY_REFERRAL = "false"
 
-# Payment: the company's own Techcombank QR (public/img/bank-qr.jpg) is shown after each order.
+# Payment: the company's own Techcombank QR is shown after each order.
 # The bank details below are printed under the QR so customers can also transfer manually.
-STATIC_QR_URL = "/img/bank-qr.jpg"
+STATIC_QR_URL = "/img/bank-qr.jpg"              # 389.000đ — full price
+STATIC_QR_URL_REFERRAL = "/img/bank-qr-2.jpg"   # 369.000đ — shown when a referral code is applied
 BANK_NAME = "Techcombank"
 BANK_ACCOUNT_NO = "1903 6328 0240 18"
 BANK_ACCOUNT_NAME = "CONG TY CO PHAN THUONG HIEU VAN HOA SELF HIIL"
