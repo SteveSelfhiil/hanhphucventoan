@@ -22,7 +22,8 @@ ORDER_DEADLINE = "2026-10-15T23:59:59+07:00"
 TRANSFER_PREFIX = "HIILEE"
 
 # Referral codes: add rows to the referral_codes table, and/or list them here (comma-separated).
-REFERRAL_CODES = ""
+# Not case-sensitive: "kimbao", "KimBao" and "KIMBAO" all work.
+REFERRAL_CODES = "HanhNhan,YenDieu,KhanhLy,Sunshine,LeNhon,KimBao,TuyetNgan,TrangLe,ThuHoai,ThanhVan,MinhThao,ThuyTrang,ThuanThao,DoanVien,MinhThu,MinhKy,PhuongThao,DuyDuc,MinhAnh,ThanhThao,MinhChau,NguyenAnh,VuNgoc,MongThuy,VuVy,HoaiNam,KimChi,KimThu,MyLinh,HangNguyen,YenHoang,MinhNguyet,DongThinh,PhuongTuyen,TheHung,BachMai,KhanhHa"
 # "true" = accept ANY non-empty code (same as the mockup). Keep "false" in production.
 ACCEPT_ANY_REFERRAL = "false"
 
