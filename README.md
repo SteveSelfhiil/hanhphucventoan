@@ -88,7 +88,16 @@ The signature option now covers all 3 books, so the FAQ placeholder "Cần xác 
 
 ## Payment QR
 
-`public/img/bank-qr.jpg` (389.000đ) and `public/img/bank-qr-2.jpg` (369.000đ, shown when a referral code is applied) are Techcombank VietQRs from the company's bank app, each with the note "Qua tang hanh phuc". The bank name, account number and holder are printed under it (`BANK_*` in `wrangler.toml`).
+QR images made in the Techcombank app live in `public/img/qr/`. The site picks one per order:
+
+| Gift sets | No referral code | With referral code |
+|---|---|---|
+| 1 | `bank-qr-without-code.jpg` (389.000đ) | `bank-qr-with-code.jpg` (369.000đ) |
+| 2 | `bank-qr-x2-without-code.jpg` (778.000đ) | `bank-qr-x2-with-code.jpg` (738.000đ) |
+| 3 | `bank-qr-x3-without-code.jpg` (1.167.000đ) | `bank-qr-x3-with-code.jpg` (1.107.000đ) |
+| 4+ | `bank-qr-blank.jpg`, no amount; the page asks the customer to type the total | same |
+
+If the price or discount changes, re-make these images in the bank app with the new amounts.
 
 ## Book preview
 

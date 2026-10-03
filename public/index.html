@@ -220,6 +220,7 @@ section{padding:88px 0}
 .qr-box.has-qr{width:250px;height:auto;border:1px solid var(--line);padding:0;background:#fff;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.08)}
 .qr-box.has-qr img{height:auto;display:block}
 .qr-note a{color:var(--pink);font-weight:600}
+.qr-amount{max-width:360px;margin:0 auto 14px;background:var(--pink-pale);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.55}
 button[disabled]{opacity:.6;cursor:wait}
 .total{display:flex;justify-content:space-between;align-items:baseline;padding:18px 0;border-top:1px solid var(--line);margin-top:6px}
 .total .l{font-size:15px;color:var(--ink-soft)}
@@ -666,6 +667,7 @@ footer .contact a:hover{color:var(--pink);border-color:var(--pink)}
           <h3>Self Hiil đã nhận đơn của bạn</h3>
           <p>Bạn quét mã QR dưới đây để chuyển khoản hoàn tất đơn.</p>
           <div class="qr-box" id="qrBox"><img id="qrImg" alt="Mã QR chuyển khoản" hidden><span class="todo" id="qrTodo">Mã QR tài khoản công ty Self Hiil</span></div>
+          <p class="qr-amount" id="qrAmountNote" hidden>Mã QR này chưa có sẵn số tiền. Khi chuyển khoản, bạn nhập số tiền <b id="qrAmountVal"></b> và nội dung chuyển khoản như bên dưới.</p>
           <div class="qr-info">
             <div><span>Mã đơn</span><b id="qrMaDon"></b></div>
             <div><span>Số tiền</span><b id="qrTien">389.000đ</b></div>
@@ -779,6 +781,7 @@ document.getElementById('orderForm').addEventListener('submit',function(e){
     document.getElementById('qrMaDon').textContent=o.orderCode;
     document.getElementById('qrTien').textContent=fmt(o.total);
     document.getElementById('qrNoiDung').textContent=o.transferNote;
+    if(o.enterAmount){document.getElementById('qrAmountVal').textContent=fmt(o.total);document.getElementById('qrAmountNote').hidden=false}
     if(o.qrUrl){var img=document.getElementById('qrImg');img.src=o.qrUrl;img.hidden=false;document.getElementById('qrTodo').hidden=true;document.getElementById('qrBox').classList.add('has-qr')}
     [['bankName','qrBank','qrBankRow'],['accountNo','qrAcc','qrAccRow'],['accountName','qrName','qrNameRow']].forEach(function(f){if(o[f[0]]){document.getElementById(f[1]).textContent=o[f[0]];document.getElementById(f[2]).hidden=false}});
     if(!o.bankName&&o.bank){document.getElementById('qrBank').textContent=o.bank;document.getElementById('qrBankRow').hidden=false}

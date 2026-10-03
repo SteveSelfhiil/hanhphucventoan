@@ -27,15 +27,16 @@ REFERRAL_CODES = "HanhNhan,YenDieu,KhanhLy,Sunshine,LeNhon,KimBao,TuyetNgan,Tran
 # "true" = accept ANY non-empty code (same as the mockup). Keep "false" in production.
 ACCEPT_ANY_REFERRAL = "false"
 
-# Payment: the company's own Techcombank QR is shown after each order.
-# The bank details below are printed under the QR so customers can also transfer manually.
-STATIC_QR_URL = "/img/bank-qr.jpg"              # 389.000đ — full price
-STATIC_QR_URL_REFERRAL = "/img/bank-qr-2.jpg"   # 369.000đ — shown when a referral code is applied
+# Payment QR images from the Techcombank app, in public/img/qr/:
+#   1–3 sets → bank-qr[-x2|-x3]-with-code.jpg / -without-code.jpg (amount already in the QR)
+#   4+ sets  → bank-qr-blank.jpg (customer types the amount shown on screen)
+# If UNIT_PRICE or REFERRAL_DISCOUNT changes, these images must be re-made in the bank app.
+QR_IMAGE_DIR = "/img/qr"
 BANK_NAME = "Techcombank"
 BANK_ACCOUNT_NO = "1903 6328 0240 18"
 BANK_ACCOUNT_NAME = "CONG TY CO PHAN THUONG HIEU VAN HOA SELF HIIL"
-# Optional: to pre-fill the amount + transfer note in the QR instead, clear STATIC_QR_URL
-# and set BANK_ID = "tcb" (VietQR), with BANK_ACCOUNT_NO written without spaces.
+# Optional: to generate a QR per order (exact amount + order code) instead, clear QR_IMAGE_DIR
+# and set BANK_ID = "tcb" (VietQR).
 BANK_ID = ""
 VIETQR_TEMPLATE = "compact2"
 
