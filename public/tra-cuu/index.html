@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tra cứu đơn hàng · Hiilee Gift 20/10</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fbf7ef;--cream-2:#f3ecdf;--line:#e2d8c4;--ink:#2e2a24;--ink-soft:#6a6358;--muted:#8a7f72;--green:#3d5234;--pink:#e43583;--pink-dark:#c2236c;--pink-pale:#fce8f1;--red:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:'Be Vietnam Pro',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;font-variant-numeric:lining-nums}
+a{color:var(--pink-dark)}
+.topbar{text-align:center;padding:14px 20px;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.topbar a{color:inherit;text-decoration:none}
+main{max-width:620px;margin:0 auto;padding:56px 16px 80px}
+.logo{display:block;width:180px;margin:0 auto 26px}
+h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:40px;line-height:1.15;text-align:center;color:var(--pink);margin:0 0 10px}
+.sub{text-align:center;color:var(--ink-soft);margin:0 0 30px;font-size:15px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px 24px}
+form{display:flex;gap:10px}
+input{flex:1;min-width:0;font:600 17px 'Be Vietnam Pro',sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--ink);background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+input:focus{outline:2px solid var(--pink);border-color:transparent}
+button{font:600 15px 'Be Vietnam Pro',sans-serif;background:var(--pink);color:#fff;border:0;border-radius:999px;padding:0 24px;cursor:pointer}
+button:hover{background:var(--pink-dark)}button[disabled]{opacity:.6;cursor:wait}
+.hint{font-size:13px;color:var(--muted);margin:10px 2px 0}
+.err{color:var(--red);font-weight:500;font-size:14.5px;margin:14px 2px 0}
+.result{margin-top:22px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.head .k{font-size:12.5px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.head .v{font-size:20px;font-weight:700;letter-spacing:1.5px}
+.badge{display:inline-block;padding:6px 14px;border-radius:999px;font-size:13.5px;font-weight:600;background:var(--pink-pale);color:var(--pink-dark)}
+.badge.done{background:#e9eee2;color:var(--green)}.badge.cancel{background:#f6e3e1;color:var(--red)}
+ol.tl{list-style:none;margin:22px 0 0;padding:0}
+ol.tl li{position:relative;padding:0 0 22px 38px}
+ol.tl li:last-child{padding-bottom:0}
+ol.tl li::before{content:"";position:absolute;left:9px;top:22px;bottom:-2px;width:2px;background:var(--line)}
+ol.tl li:last-child::before{display:none}
+ol.tl .dot{position:absolute;left:0;top:2px;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);background:#fff}
+ol.tl li.on .dot{border-color:var(--pink);background:var(--pink);box-shadow:0 0 0 4px var(--pink-pale)}
+ol.tl li.on::before{background:var(--pink)}
+ol.tl li.cur .dot{animation:pulse 1.8s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(228,53,131,.12)}}
+ol.tl b{display:block;font-size:15.5px}
+ol.tl li:not(.on) b{color:var(--muted);font-weight:500}
+ol.tl span{font-size:13.5px;color:var(--ink-soft)}
+.meta{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:var(--ink-soft)}
+.meta div{display:flex;justify-content:space-between;gap:12px;padding:4px 0}.meta b{color:var(--ink);text-align:right}
+.foot{text-align:center;margin-top:30px;font-size:14px;color:var(--ink-soft)}
+@media(max-width:480px){h1{font-size:32px}form{flex-direction:column}button{padding:14px}}
+</style>
+</head>
+<body>
+<div class="topbar"><a href="/">Hiilee Gift · 20/10</a></div>
+<main>
+  <a href="/"><img class="logo" src="/logo.svg" alt="HIILEE - Hạnh phúc vẹn toàn"></a>
+  <h1>Tra cứu đơn hàng</h1>
+  <p class="sub">Nhập mã theo dõi Self Hiil đã gửi qua email sau khi nhận được thanh toán.</p>
+  <div class="card">
+    <form id="f">
+      <input id="ma" name="ma" placeholder="HLXXXXXXXX" maxlength="12" autocomplete="off" spellcheck="false" aria-label="Mã theo dõi" required>
+      <button id="go" type="submit">Tra cứu</button>
+    </form>
+    <p class="hint">Mã gồm 10 ký tự, bắt đầu bằng <b>HL</b>.</p>
+    <p class="err" id="err" hidden></p>
+    <div class="result" id="res" hidden>
+      <div class="head">
+        <div><div class="k">Mã đơn</div><div class="v" id="rOrder"></div></div>
+        <span class="badge" id="rBadge"></span>
+      </div>
+      <ol class="tl" id="tl"></ol>
+      <div class="meta" id="meta"></div>
+    </div>
+  </div>
+  <p class="foot">Cần hỗ trợ? Gọi <a href="tel:+84865161315">+84 865 161 315</a> hoặc email <a href="mailto:hiila@selfhiil.com">hiila@selfhiil.com</a><br><a href="/">← Về trang Hiilee Gift</a></p>
+</main>
+<script>
+var LABEL={pending:'Chờ thanh toán',paid:'Đã thanh toán · Đang chuẩn bị quà',shipped:'Đang giao quà',delivered:'Đã giao quà',cancelled:'Đã huỷ'};
+function t(iso){if(!iso)return'';var d=new Date(iso);return d.toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit',year:'numeric'})}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function show(o){
+  var steps=[['created','Đã nhận đơn','Self Hiil đã ghi nhận đơn đặt quà của bạn.'],
+             ['paid','Đã nhận thanh toán',o.signed?'Đang đóng gói, thắt ruy băng và xin chữ ký tác giả trên cả 3 cuốn sách.':'Đang đóng gói và thắt ruy băng cho bộ quà.'],
+             ['shipped','Đang giao quà',o.carrier||o.shippingRef?('Đơn vị vận chuyển: '+esc(o.carrier||'')+(o.shippingRef?' · Mã vận đơn: '+esc(o.shippingRef):'')):'Bộ quà đang trên đường đến người nhận.'],
+             ['delivered','Đã giao quà','Món quà đã đến tay người nhận. Cảm ơn bạn!']];
+  if(o.status==='cancelled')steps=[steps[0],['cancelled','Đơn đã huỷ','Liên hệ Self Hiil nếu bạn cần hỗ trợ.']];
+  var lastOn=-1;steps.forEach(function(s,i){if(o.timeline[s[0]])lastOn=i});
+  document.getElementById('tl').innerHTML=steps.map(function(s,i){var on=!!o.timeline[s[0]];
+    return '<li class="'+(on?'on':'')+(i===lastOn&&o.status!=='delivered'&&o.status!=='cancelled'?' cur':'')+'"><span class="dot"></span><b>'+s[1]+'</b><span>'+(on?t(o.timeline[s[0]])+' · ':'')+s[2]+'</span></li>'}).join('');
+  document.getElementById('rOrder').textContent=o.orderCode;
+  var b=document.getElementById('rBadge');b.textContent=LABEL[o.status]||o.status;b.className='badge'+(o.status==='delivered'?' done':o.status==='cancelled'?' cancel':'');
+  document.getElementById('meta').innerHTML='<div><span>Mã theo dõi</span><b>'+o.trackingCode+'</b></div><div><span>Số bộ quà</span><b>'+o.quantity+'</b></div><div><span>Giao quà dự kiến</span><b>17–18/10/2026</b></div>';
+  document.getElementById('res').hidden=false;
+}
+function lookup(code){
+  var err=document.getElementById('err'),btn=document.getElementById('go');err.hidden=true;document.getElementById('res').hidden=true;btn.disabled=true;
+  fetch('/api/track?code='+encodeURIComponent(code)).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})})
+  .then(function(x){if(!x.ok)throw new Error(x.j.error||'Không tra cứu được.');show(x.j);try{history.replaceState(null,'','?ma='+x.j.trackingCode)}catch(e){}})
+  .catch(function(e){err.textContent=e.message||'Có lỗi kết nối, bạn thử lại nhé.';err.hidden=false})
+  .finally(function(){btn.disabled=false});
+}
+document.getElementById('f').addEventListener('submit',function(e){e.preventDefault();var v=document.getElementById('ma').value.trim();if(v)lookup(v)});
+var q=new URLSearchParams(location.search).get('ma');if(q){document.getElementById('ma').value=q;lookup(q)}
+</script>
+</body>
+</html>

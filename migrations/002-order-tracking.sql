@@ -1,0 +1,10 @@
+ALTER TABLE orders ADD COLUMN tracking_code TEXT;
+ALTER TABLE orders ADD COLUMN paid_at TEXT;
+ALTER TABLE orders ADD COLUMN shipped_at TEXT;
+ALTER TABLE orders ADD COLUMN delivered_at TEXT;
+ALTER TABLE orders ADD COLUMN cancelled_at TEXT;
+ALTER TABLE orders ADD COLUMN carrier TEXT;
+ALTER TABLE orders ADD COLUMN shipping_ref TEXT;
+ALTER TABLE orders ADD COLUMN email_sent_at TEXT;
+ALTER TABLE orders ADD COLUMN email_error TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_tracking ON orders(tracking_code);

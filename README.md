@@ -74,4 +74,22 @@ npm run dev        # http://localhost:8787
 - Spam protection: a hidden field that only bots fill in, and a limit of 5 orders per IP every 10 minutes.
 - The page loads much faster. The images used to be embedded inside the HTML, which was about 1.9 MB. They are now separate files, and the HTML is about 55 KB.
 
-**Still to decide:** the FAQ still has one yellow note, "Cần xác nhận: ký cuốn nào" (which book gets signed). The other content is unchanged from the original.
+The signature option now covers all 3 books, so the FAQ placeholder "Cần xác nhận: ký cuốn nào" has been removed.
+
+## Order tracking & emails
+
+- **Admin page:** `https://hanhphucventoan.com/admin/` (log in with `ADMIN_TOKEN`). Confirm payments, mark orders shipped/delivered, cancel, resend emails, download CSV.
+- **Customer tracking page:** `https://hanhphucventoan.com/tra-cuu/`, where customers enter their `HL…` tracking code.
+- When an order is marked **paid**, a tracking code is created and emailed to the buyer via [Resend](https://resend.com).
+  1. Create a Resend account → **Domains → Add domain** `hanhphucventoan.com` → add the DNS records it shows in Cloudflare.
+  2. Resend → **API Keys → Create** → add it to the Worker as the secret `RESEND_API_KEY`.
+  3. `MAIL_FROM`, `MAIL_REPLY_TO`, `MAIL_BCC` and `SITE_URL` are in `wrangler.toml`.
+- **Existing databases** need the new columns once: paste `migrations/002-order-tracking.sql` into the D1 Console and run it. (`schema.sql` already includes them for new databases.)
+
+## Payment QR
+
+`public/img/bank-qr.jpg` is the Techcombank VietQR from the company's bank app. The bank name, account number and holder are printed under it (`BANK_*` in `wrangler.toml`).
+
+## Book preview
+
+`public/img/doc-thu/` holds the 27 pages of *Trưởng thành* (cover → end of Chapter 1), shown as a page-turning book using [StPageFlip](https://github.com/Nodlik/StPageFlip) (MIT licence, vendored in `public/vendor/`).

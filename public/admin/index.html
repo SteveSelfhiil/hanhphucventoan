@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Quản lý đơn · Hiilee Gift</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fbf7ef;--cream-2:#f3ecdf;--line:#e2d8c4;--ink:#2e2a24;--ink-soft:#6a6358;--muted:#8a7f72;--green:#3d5234;--green-pale:#e9eee2;--pink:#e43583;--pink-dark:#c2236c;--pink-pale:#fce8f1;--red:#b3261e;--red-pale:#f6e3e1;--amber:#8a5a00;--amber-pale:#fff1d6;--blue:#1f5f8b;--blue-pale:#e3eef6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 'Be Vietnam Pro',sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+header img{height:34px}
+header .r{display:flex;gap:8px;align-items:center}
+main{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+button,.b{font:600 13.5px 'Be Vietnam Pro',sans-serif;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+button:hover{border-color:var(--ink-soft)}button[disabled]{opacity:.5;cursor:wait}
+.pri{background:var(--pink);border-color:var(--pink);color:#fff}.pri:hover{background:var(--pink-dark);border-color:var(--pink-dark)}
+.warn{background:var(--amber-pale);border-color:#e8c27a;color:var(--amber)}
+input,select{font:inherit;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;color:var(--ink)}
+input:focus,select:focus{outline:2px solid var(--pink);border-color:transparent}
+#login{max-width:380px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px}
+#login h1{font-size:20px;margin:0 0 6px}#login p{color:var(--ink-soft);margin:0 0 16px}
+#login input{width:100%;margin-bottom:12px}#login button{width:100%;padding:11px}
+.err{color:var(--red);font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.stat .k{font-size:12.5px;color:var(--muted)}.stat .v{font-size:22px;font-weight:700}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.bar input{flex:1;min-width:200px}
+.list{display:flex;flex-direction:column;gap:10px}
+.o{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:1.1fr 1.4fr 1fr auto;gap:14px;align-items:start}
+.o .code{font-weight:700;letter-spacing:.5px}
+.o .sm{font-size:13px;color:var(--ink-soft)}
+.o .addr{font-size:13px;color:var(--ink-soft);word-break:break-word}
+.tag{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:2px 10px;margin:4px 4px 0 0}
+.s-pending{background:var(--amber-pale);color:var(--amber)}.s-paid{background:var(--pink-pale);color:var(--pink-dark)}.s-shipped{background:var(--blue-pale);color:var(--blue)}.s-delivered{background:var(--green-pale);color:var(--green)}.s-cancelled{background:var(--red-pale);color:var(--red)}
+.t-mail-ok{background:var(--green-pale);color:var(--green)}.t-mail-err{background:var(--red-pale);color:var(--red)}.t-misc{background:var(--cream-2);color:var(--ink-soft)}
+.acts{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:170px}
+.ship{display:flex;flex-direction:column;gap:6px}
+.ship input{padding:7px 10px;font-size:13px}
+.total{font-weight:700}
+.empty{text-align:center;color:var(--muted);padding:40px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;max-width:92vw;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:10}
+@media(max-width:860px){.o{grid-template-columns:1fr 1fr}.acts{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}}
+@media(max-width:520px){.o{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="login">
+  <h1>Quản lý đơn Hiilee Gift</h1>
+  <p>Nhập mật khẩu quản trị (ADMIN_TOKEN).</p>
+  <form id="lf"><input id="tok" type="password" autocomplete="current-password" placeholder="Mật khẩu" required><button class="pri" type="submit">Đăng nhập</button></form>
+  <p class="err" id="lerr" hidden></p>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <a href="/"><img src="/logo.svg" alt="HIILEE"></a>
+    <div class="r"><button id="csv">Tải file Excel (CSV)</button><button id="reload">Làm mới</button><button id="logout">Đăng xuất</button></div>
+  </header>
+  <main>
+    <div class="stats" id="stats"></div>
+    <div class="bar">
+      <div class="tabs" id="tabs"></div>
+      <input id="q" type="search" placeholder="Tìm theo mã đơn, tên, SĐT, email, mã giới thiệu…">
+    </div>
+    <div class="list" id="list"></div>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+var TOKEN='',ORDERS=[],FILTER='pending';
+var ST={pending:'Chờ thanh toán',paid:'Đã thanh toán',shipped:'Đang giao',delivered:'Đã giao',cancelled:'Đã huỷ'};
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function money(n){return Number(n||0).toLocaleString('vi-VN').replace(/,/g,'.')+'đ'}
+function vn(t){if(!t)return'';return new Date(t.replace(' ','T')+'Z').toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}
+function toast(m){var t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},5000)}
+function api(path,opt){opt=opt||{};opt.headers=Object.assign({authorization:'Bearer '+TOKEN},opt.headers||{});
+  return fetch(path,opt).then(function(r){if(r.status===401){logout();throw new Error('Sai mật khẩu quản trị.')}return r})}
+
+function login(tok){TOKEN=tok;return api('/api/admin/orders').then(function(r){return r.json()}).then(function(d){
+  try{sessionStorage.setItem('hg_admin',tok)}catch(e){}
+  $('login').hidden=true;$('app').hidden=false;ORDERS=d.orders||[];render()})}
+function logout(){TOKEN='';try{sessionStorage.removeItem('hg_admin')}catch(e){}$('app').hidden=true;$('login').hidden=false}
+function reload(){return api('/api/admin/orders').then(function(r){return r.json()}).then(function(d){ORDERS=d.orders||[];render()})}
+
+function render(){
+  var c={all:ORDERS.length},rev=0,sets=0;
+  ORDERS.forEach(function(o){c[o.status]=(c[o.status]||0)+1;if(['paid','shipped','delivered'].indexOf(o.status)>=0){rev+=o.total;sets+=o.quantity}});
+  $('stats').innerHTML=[['Tổng đơn',c.all],['Chờ thanh toán',c.pending||0],['Đã thanh toán (bộ quà)',sets],['Doanh thu đã nhận',money(rev)]]
+    .map(function(s){return '<div class="stat"><div class="k">'+s[0]+'</div><div class="v">'+s[1]+'</div></div>'}).join('');
+  $('tabs').innerHTML=['pending','paid','shipped','delivered','cancelled','all'].map(function(k){
+    return '<button data-f="'+k+'" aria-pressed="'+(FILTER===k)+'">'+(k==='all'?'Tất cả':ST[k])+' ('+(c[k]||0)+')</button>'}).join('');
+  var q=$('q').value.trim().toLowerCase();
+  var rows=ORDERS.filter(function(o){return (FILTER==='all'||o.status===FILTER)&&(!q||[o.order_code,o.tracking_code,o.name,o.phone,o.email,o.referral_code,o.recipient_name].join(' ').toLowerCase().indexOf(q)>=0)});
+  $('list').innerHTML=rows.length?rows.map(card).join(''):'<div class="empty">Không có đơn nào.</div>';
+}
+function card(o){
+  var mail=o.tracking_code?(o.email_sent_at?'<span class="tag t-mail-ok">Đã gửi email '+vn(o.email_sent_at)+'</span>':(o.email_error?'<span class="tag t-mail-err" title="'+esc(o.email_error)+'">Email lỗi</span>':'')):'';
+  var a='';
+  if(o.status==='pending')a+='<button class="pri" data-act="paid" data-c="'+o.order_code+'">Xác nhận đã thanh toán</button>';
+  if(o.status==='paid')a+='<div class="ship"><input placeholder="Đơn vị vận chuyển" data-carrier="'+o.order_code+'"><input placeholder="Mã vận đơn (nếu có)" data-ref="'+o.order_code+'"><button class="pri" data-act="shipped" data-c="'+o.order_code+'">Đã gửi đi giao</button></div>';
+  if(o.status==='shipped')a+='<button class="pri" data-act="delivered" data-c="'+o.order_code+'">Đã giao xong</button>';
+  if(o.tracking_code)a+='<button data-act="resend" data-c="'+o.order_code+'">Gửi lại email</button>';
+  if(o.status!=='cancelled'&&o.status!=='delivered')a+='<button data-act="cancelled" data-c="'+o.order_code+'">Huỷ đơn</button>';
+  if(o.status==='cancelled')a+='<button data-act="pending" data-c="'+o.order_code+'">Khôi phục đơn</button>';
+  return '<div class="o">'+
+    '<div><div class="code">'+o.order_code+'</div><div class="sm">'+vn(o.created_at)+'</div>'+
+      '<span class="tag s-'+o.status+'">'+ST[o.status]+'</span>'+(o.tracking_code?'<span class="tag t-misc">'+o.tracking_code+'</span>':'')+mail+
+      (o.referral_code?'<span class="tag t-misc">Mã GT: '+esc(o.referral_code)+'</span>':'')+'</div>'+
+    '<div><b>'+esc(o.name)+'</b> · <a style="color:inherit" href="tel:'+esc(o.phone)+'">'+esc(o.phone)+'</a><div class="sm">'+esc(o.email)+'</div>'+
+      (o.ship_to_recipient?'<div class="sm">Giao cho: <b>'+esc(o.recipient_name)+'</b> · '+esc(o.recipient_phone)+'</div>':'')+
+      '<div class="addr">'+esc(o.address)+'</div>'+(o.note?'<div class="sm">Ghi chú: '+esc(o.note)+'</div>':'')+
+      (o.carrier||o.shipping_ref?'<div class="sm">Vận chuyển: '+esc(o.carrier||'')+' '+esc(o.shipping_ref||'')+'</div>':'')+'</div>'+
+    '<div><span class="total">'+money(o.total)+'</span><div class="sm">'+o.quantity+' bộ · tặng '+esc(o.recipient_type)+'</div>'+
+      (o.signed?'<span class="tag warn">Ký tặng cả 3 cuốn</span>':'')+'<div class="sm">Nội dung CK: HIILEE '+o.order_code+'</div></div>'+
+    '<div class="acts">'+a+'</div></div>';
+}
+
+$('list').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-act]');if(!b)return;var code=b.dataset.c,act=b.dataset.act;
+  if(['paid','cancelled'].indexOf(act)>=0&&!b.dataset.sure){b.dataset.sure='1';b.dataset.txt=b.textContent;b.textContent=act==='paid'?'Bấm lần nữa để xác nhận':'Bấm lần nữa để huỷ';b.classList.add('warn');
+    setTimeout(function(){if(b.isConnected){delete b.dataset.sure;b.textContent=b.dataset.txt;b.classList.remove('warn')}},4000);return}
+  b.disabled=true;
+  var req=act==='resend'?api('/api/admin/orders/'+code+'/resend-email',{method:'POST'})
+    :api('/api/admin/orders/'+code+'/status',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({status:act,
+      carrier:(document.querySelector('[data-carrier="'+code+'"]')||{}).value||undefined,shippingRef:(document.querySelector('[data-ref="'+code+'"]')||{}).value||undefined})});
+  req.then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Lỗi');return j})}).then(function(j){
+    var m=act==='resend'?'':ST[j.status]+' · '+code;
+    if(j.trackingCode&&(act==='paid'||act==='resend'))m+=(m?' · ':'')+'Mã theo dõi '+j.trackingCode;
+    if(j.email)m+=j.email.ok?' · Đã gửi email tới '+j.email.to:' · Chưa gửi được email: '+j.email.error;
+    toast(m);return reload()}).catch(function(err){toast(err.message);b.disabled=false});
+});
+$('tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(b){FILTER=b.dataset.f;render()}});
+$('q').addEventListener('input',render);
+$('reload').onclick=function(){reload().then(function(){toast('Đã cập nhật danh sách đơn')})};
+$('logout').onclick=logout;
+$('csv').onclick=function(){api('/api/admin/orders.csv').then(function(r){return r.blob()}).then(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='hiilee-gift-don-hang-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove()})};
+$('lf').addEventListener('submit',function(e){e.preventDefault();$('lerr').hidden=true;login($('tok').value.trim()).catch(function(err){$('lerr').textContent=err.message;$('lerr').hidden=false})});
+var saved='';try{saved=sessionStorage.getItem('hg_admin')||''}catch(e){}
+if(saved)login(saved).catch(function(){});
+</script>
+</body>
+</html>

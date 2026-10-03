@@ -126,9 +126,23 @@ section{padding:88px 0}
 .excerpt .eyebrow{color:var(--on-green)}
 .excerpt .section-title{color:var(--cream)}
 .excerpt .section-sub{color:var(--on-green)}
-.doc-gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:40px}
-.doc-gallery img{cursor:zoom-in;width:100%;border-radius:3px;box-shadow:0 18px 40px rgba(0,0,0,.32);background:#fff}
-@media(max-width:700px){.doc-gallery{grid-template-columns:1fr 1fr;gap:14px}}
+.fb-stage{margin:44px auto 0;max-width:980px;display:flex;justify-content:center;perspective:2000px}
+.fb-book{margin:0 auto;filter:drop-shadow(0 26px 40px rgba(0,0,0,.35));transition:transform .6s ease}
+.fb-book.at-front{transform:translateX(-25%)}.fb-book.at-back{transform:translateX(25%)}
+.fb-page{background:#fff;overflow:hidden}
+.fb-blank{background:#fbfaf6}
+.fb-page img{width:100%;height:100%;object-fit:cover;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.fb-page:not(.fb-hard)::after{content:"";position:absolute;inset:0;pointer-events:none}
+.stf__item.--left .fb-page::after,.fb-page.--left::after{background:linear-gradient(to left,rgba(0,0,0,.12),rgba(0,0,0,0) 8%)}
+.fb-page.--right::after{background:linear-gradient(to right,rgba(0,0,0,.12),rgba(0,0,0,0) 8%)}
+.fb-controls{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:28px;flex-wrap:wrap}
+.fb-btn{width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:transparent;color:var(--cream);font-size:28px;line-height:1;cursor:pointer;padding:0 0 4px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.fb-btn:hover:not([disabled]){background:var(--cream);color:var(--green)}
+.fb-btn[disabled]{opacity:.3;cursor:default}
+.fb-count{min-width:120px;text-align:center;font-size:14.5px;color:var(--on-green);letter-spacing:.5px}
+.fb-zoom{border:1px solid rgba(255,255,255,.35);background:transparent;color:var(--cream);border-radius:999px;padding:10px 18px;font:500 13.5px 'Be Vietnam Pro',sans-serif;cursor:pointer}
+.fb-zoom:hover{background:var(--cream);color:var(--green)}
+@media(max-width:700px){.fb-stage{margin-top:30px}.fb-zoom{flex-basis:100%;max-width:200px}}
 .zoom-hint{text-align:center;font-size:13px;color:#c9d4c1;margin-top:22px}
 .lightbox{position:fixed;inset:0;z-index:100;background:rgba(20,24,18,.92);display:none;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
 .lightbox.show{display:flex}
@@ -203,7 +217,9 @@ section{padding:88px 0}
 .hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
 .field.invalid input,.field.invalid textarea{border-color:#b3261e}
 .qr-box img{width:100%;height:100%;object-fit:contain}
-.qr-box.has-qr{border-style:solid;padding:6px;background:#fff}
+.qr-box.has-qr{width:250px;height:auto;border:1px solid var(--line);padding:0;background:#fff;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.08)}
+.qr-box.has-qr img{height:auto;display:block}
+.qr-note a{color:var(--pink);font-weight:600}
 button[disabled]{opacity:.6;cursor:wait}
 .total{display:flex;justify-content:space-between;align-items:baseline;padding:18px 0;border-top:1px solid var(--line);margin-top:6px}
 .total .l{font-size:15px;color:var(--ink-soft)}
@@ -334,7 +350,7 @@ footer .contact a:hover{color:var(--pink);border-color:var(--pink)}
     </div>
     <div class="benefit">
       <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M2 9h20M12 9v12"/><path d="M12 9c-2-4-6-4-6-1.5S10 9 12 9zM12 9c2-4 6-4 6-1.5S14 9 12 9z"/></svg></div>
-      <h3>Ruy băng &amp; chữ ký</h3><p>Thắt ruy băng sẵn sàng trao tặng, có chữ ký tác giả nếu bạn muốn</p>
+      <h3>Ruy băng &amp; chữ ký</h3><p>Thắt ruy băng sẵn sàng trao tặng, có chữ ký tác giả trên cả 3 cuốn nếu bạn muốn</p>
     </div>
     <div class="benefit">
       <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21v-9"/><path d="M12 12C12 7 8 5 4 5c0 4 3 7 8 7zM12 14c0-4 3-6 7-6 0 3.5-2.5 6-7 6z"/></svg></div>
@@ -445,15 +461,47 @@ footer .contact a:hover{color:var(--pink);border-color:var(--pink)}
 <section class="excerpt" id="doc-thu">
   <div class="wrap">
     <div class="eyebrow">Đọc thử · Trưởng thành</div>
-    <h2 class="section-title">Con có muốn trưởng thành không?</h2>
-    <p class="section-sub">Vài trang thật trong bản in, để bạn cảm được giọng văn trước khi trao tặng.</p>
-    <div class="doc-gallery">
-      <img src="/img/preview-1.png" alt="Trang mở đầu sách Trưởng thành">
-      <img src="/img/preview-2.png" alt="Mục lục sách Trưởng thành">
-      <img src="/img/preview-3.png" alt="Chương 1 trang 16">
-      <img src="/img/preview-4.png" alt="Chương 1 trang 17">
+    <h2 class="section-title">Lật mở trọn Chương 1</h2>
+    <p class="section-sub">27 trang thật từ bản in: bìa sách, lời mở đầu “Câu hỏi tôi từng trăn trở” và toàn bộ Chương 1 “Vì sao con người cần trưởng thành?”.</p>
+    <div class="fb-stage">
+      <div class="fb-book" id="flipbook">
+        <div class="fb-page fb-hard" data-density="hard"><img src="/img/doc-thu/trang-01.webp" alt="Trưởng thành – trang 1 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img src="/img/doc-thu/trang-02.webp" alt="Trưởng thành – trang 2 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img src="/img/doc-thu/trang-03.webp" alt="Trưởng thành – trang 3 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img src="/img/doc-thu/trang-04.webp" alt="Trưởng thành – trang 4 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img src="/img/doc-thu/trang-05.webp" alt="Trưởng thành – trang 5 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img src="/img/doc-thu/trang-06.webp" alt="Trưởng thành – trang 6 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-07.webp" alt="Trưởng thành – trang 7 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-08.webp" alt="Trưởng thành – trang 8 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-09.webp" alt="Trưởng thành – trang 9 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-10.webp" alt="Trưởng thành – trang 10 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-11.webp" alt="Trưởng thành – trang 11 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-12.webp" alt="Trưởng thành – trang 12 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-13.webp" alt="Trưởng thành – trang 13 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-14.webp" alt="Trưởng thành – trang 14 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-15.webp" alt="Trưởng thành – trang 15 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-16.webp" alt="Trưởng thành – trang 16 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-17.webp" alt="Trưởng thành – trang 17 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-18.webp" alt="Trưởng thành – trang 18 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-19.webp" alt="Trưởng thành – trang 19 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-20.webp" alt="Trưởng thành – trang 20 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-21.webp" alt="Trưởng thành – trang 21 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-22.webp" alt="Trưởng thành – trang 22 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-23.webp" alt="Trưởng thành – trang 23 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-24.webp" alt="Trưởng thành – trang 24 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-25.webp" alt="Trưởng thành – trang 25 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page"><img data-src="/img/doc-thu/trang-26.webp" alt="Trưởng thành – trang 26 / 27" width="760" height="951" draggable="false"></div>
+        <div class="fb-page fb-blank" data-pg="0"></div>
+        <div class="fb-page fb-hard" data-density="hard"><img data-src="/img/doc-thu/trang-27.webp" alt="Trưởng thành – trang 27 / 27" width="760" height="951" draggable="false"></div>
+      </div>
     </div>
-    <p class="zoom-hint">Chạm vào trang để xem lớn</p>
+    <div class="fb-controls">
+      <button type="button" class="fb-btn" id="fbPrev" aria-label="Trang trước">‹</button>
+      <span class="fb-count" id="fbCount" aria-live="polite">Bìa sách</span>
+      <button type="button" class="fb-btn" id="fbNext" aria-label="Trang sau">›</button>
+      <button type="button" class="fb-zoom" id="fbZoom">Phóng to trang</button>
+    </div>
+    <p class="zoom-hint">Kéo góc trang hoặc bấm mũi tên để lật sách</p>
   </div>
 </section>
 
@@ -582,7 +630,7 @@ footer .contact a:hover{color:var(--pink);border-color:var(--pink)}
               </div>
               <span class="hint">Để Self Hiil hiểu hơn về món quà bạn trao.</span>
             </div>
-            <label class="check"><input type="checkbox" name="signed" value="1"> Tôi muốn sách có chữ ký của tác giả Nguyễn Thuỳ Liên</label>
+            <label class="check"><input type="checkbox" name="signed" value="1"> Tôi muốn tất cả sách có chữ ký của tác giả Nguyễn Thuỳ Liên <span class="opt">(cả 3 cuốn)</span></label>
           </div>
 
           <div class="fgroup">
@@ -622,9 +670,11 @@ footer .contact a:hover{color:var(--pink);border-color:var(--pink)}
             <div><span>Mã đơn</span><b id="qrMaDon"></b></div>
             <div><span>Số tiền</span><b id="qrTien">389.000đ</b></div>
             <div><span>Nội dung chuyển khoản</span><b id="qrNoiDung"></b></div>
-            <div id="qrBankRow" hidden><span>Tài khoản</span><b id="qrBank"></b></div>
+            <div id="qrBankRow" hidden><span>Ngân hàng</span><b id="qrBank"></b></div>
+            <div id="qrAccRow" hidden><span>Số tài khoản</span><b id="qrAcc"></b></div>
+            <div id="qrNameRow" hidden><span>Chủ tài khoản</span><b id="qrName"></b></div>
           </div>
-          <p class="qr-note">Self Hiil sẽ gửi email xác nhận đơn sau khi nhận được chuyển khoản. Đơn chưa thanh toán sau 24 giờ sẽ tự huỷ.</p>
+          <p class="qr-note">Bạn ghi đúng <b>nội dung chuyển khoản</b> ở trên để Self Hiil đối soát nhanh. Sau khi nhận được tiền, Self Hiil sẽ gửi email kèm <b>mã theo dõi đơn hàng</b> để bạn <a href="/tra-cuu/">tra cứu đơn</a>. Đơn chưa thanh toán sau 24 giờ sẽ tự huỷ.</p>
           <p class="serif" style="font-size:22px;font-style:italic;color:var(--pink);margin-top:18px">Trao một món quà. Gieo một hành trình trưởng thành.</p>
         </div>
       </div>
@@ -640,7 +690,7 @@ footer .contact a:hover{color:var(--pink);border-color:var(--pink)}
       <div class="faq-item"><button class="faq-q" onclick="moFaq(this)"><span>Bộ quà gồm những gì?</span><span class="faq-icon">+</span></button>
         <div class="faq-a"><p>Hai cuốn sách của tác giả Nguyễn Thuỳ Liên là HIILEE-6PR và Trưởng thành, kèm cuốn coach book Hạnh Phúc Ngon Ơ! được tặng kèm, tất cả thắt ruy băng. Bộ quà không kèm hộp.</p></div></div>
       <div class="faq-item"><button class="faq-q" onclick="moFaq(this)"><span>Sách có chữ ký của tác giả không?</span><span class="faq-icon">+</span></button>
-        <div class="faq-a"><p>Có, nếu bạn muốn. Khi đặt quà, bạn tích ô "Tôi muốn sách có chữ ký của tác giả Nguyễn Thuỳ Liên", Self Hiil sẽ gửi sách có chữ ký của tác giả. <span class="todo">Cần xác nhận: ký cuốn nào</span></p></div></div>
+        <div class="faq-a"><p>Có, nếu bạn muốn. Khi đặt quà, bạn tích ô "Tôi muốn tất cả sách có chữ ký của tác giả Nguyễn Thuỳ Liên", tác giả sẽ ký tặng trên cả 3 cuốn sách trong bộ quà.</p></div></div>
       <div class="faq-item"><button class="faq-q" onclick="moFaq(this)"><span>Khi nào người nhận có quà?</span><span class="faq-icon">+</span></button>
         <div class="faq-a"><p>Self Hiil nhận đặt đến hết ngày 15/10/2026 và giao quà dự kiến ngày 17–18/10/2026, kịp trước ngày 20/10.</p></div></div>
       <div class="faq-item"><button class="faq-q" onclick="moFaq(this)"><span>Mình có thể gửi quà thẳng đến người nhận không?</span><span class="faq-icon">+</span></button>
@@ -680,6 +730,7 @@ footer .contact a:hover{color:var(--pink);border-color:var(--pink)}
       <li><span>Địa chỉ</span>99 Nguyễn Cửu Vân, P. Gia Định, HCM</li>
       <li><span>Hotline</span><a href="tel:+84865161315">+84 865 161 315</a></li>
       <li><span>Email</span><a href="mailto:hiila@selfhiil.com">hiila@selfhiil.com</a></li>
+      <li><span>Đơn hàng</span><a href="/tra-cuu/">Tra cứu đơn hàng</a></li>
     </ul>
   </div>
 </footer>
@@ -692,6 +743,7 @@ footer .contact a:hover{color:var(--pink);border-color:var(--pink)}
   <a href="#dat-qua" class="btn btn-solid">Đặt bộ quà tặng</a>
 </div>
 
+<script src="/vendor/page-flip.browser.js"></script>
 <script>
 /* Tương tác form + gửi đơn tới Cloudflare Worker. Giá cuối cùng luôn do máy chủ tính. */
 var gia=389000, giamMa=20000, giam=0, maDaApDung='';
@@ -728,7 +780,8 @@ document.getElementById('orderForm').addEventListener('submit',function(e){
     document.getElementById('qrTien').textContent=fmt(o.total);
     document.getElementById('qrNoiDung').textContent=o.transferNote;
     if(o.qrUrl){var img=document.getElementById('qrImg');img.src=o.qrUrl;img.hidden=false;document.getElementById('qrTodo').hidden=true;document.getElementById('qrBox').classList.add('has-qr')}
-    if(o.bank){document.getElementById('qrBank').textContent=o.bank;document.getElementById('qrBankRow').hidden=false}
+    [['bankName','qrBank','qrBankRow'],['accountNo','qrAcc','qrAccRow'],['accountName','qrName','qrNameRow']].forEach(function(f){if(o[f[0]]){document.getElementById(f[1]).textContent=o[f[0]];document.getElementById(f[2]).hidden=false}});
+    if(!o.bankName&&o.bank){document.getElementById('qrBank').textContent=o.bank;document.getElementById('qrBankRow').hidden=false}
     document.getElementById('orderBox').classList.add('sent');
     document.getElementById('orderBox').scrollIntoView({behavior:'smooth',block:'center'});
   })
@@ -736,7 +789,24 @@ document.getElementById('orderForm').addEventListener('submit',function(e){
   .finally(function(){btn.disabled=false;btn.textContent='Đặt bộ quà tặng'});
 });
 function moFaq(b){var it=b.parentElement,o=it.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(function(x){x.classList.remove('open');x.querySelector('.faq-a').style.maxHeight=null});if(!o){it.classList.add('open');var a=it.querySelector('.faq-a');a.style.maxHeight=a.scrollHeight+'px'}}
-document.querySelectorAll('.doc-gallery img').forEach(function(i){i.onclick=function(){document.getElementById('lbImg').src=i.src;document.getElementById('lb').classList.add('show')}});
+/* sách lật trang: Chương 1 Trưởng thành (StPageFlip, MIT) */
+(function(){var el=document.getElementById('flipbook');if(!el||!window.St)return;
+var pages=el.querySelectorAll('.fb-page'),N=pages.length;
+function load(i){var im=pages[i]&&pages[i].querySelector('img');if(im&&im.dataset.src){im.src=im.dataset.src;im.removeAttribute('data-src')}}
+function pg(i){var im=pages[i]&&pages[i].querySelector('img');return im?i+1:0}
+var pf=new St.PageFlip(el,{width:380,height:476,size:'stretch',minWidth:260,maxWidth:480,minHeight:325,maxHeight:600,showCover:true,maxShadowOpacity:.5,mobileScrollSupport:true,flippingTime:800,usePortrait:true,autoSize:true,drawShadow:true});
+pf.loadFromHTML(pages);
+var prev=document.getElementById('fbPrev'),next=document.getElementById('fbNext'),cnt=document.getElementById('fbCount');
+function upd(){var i=pf.getCurrentPageIndex(),portrait=pf.getOrientation()==='portrait';for(var k=i-2;k<=i+6;k++)load(k);
+  var a=pg(i),b=portrait?0:pg(i+1),t;
+  if(i===0)t='Bìa sách';else if(i>=N-1)t='Bìa sau';else{var ps=[a,b].filter(Boolean);t='Trang '+ps.join('–')+' / 27'}
+  cnt.textContent=t;prev.disabled=i===0;next.disabled=i>=N-1;
+  el.classList.toggle('at-front',!portrait&&i===0);el.classList.toggle('at-back',!portrait&&i>=N-1)}
+pf.on('flip',upd);pf.on('changeOrientation',upd);pf.on('changeState',function(e){if(e.data==='flipping'||e.data==='user_fold'){el.classList.remove('at-front','at-back')}else upd()});upd();
+prev.onclick=function(){pf.flipPrev()};next.onclick=function(){pf.flipNext()};
+document.addEventListener('keydown',function(e){var r=el.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;if(e.key==='ArrowRight')pf.flipNext();if(e.key==='ArrowLeft')pf.flipPrev()});
+document.getElementById('fbZoom').onclick=function(){var i=pf.getCurrentPageIndex();if(!pages[i].querySelector('img')&&i>0)i--;load(i);document.getElementById('lbImg').src=pages[i].querySelector('img').src;document.getElementById('lb').classList.add('show')};
+})();
 /* carousel cảm nhận độc giả */
 (function(){var t=document.getElementById('tcTrack');if(!t)return;var sl=t.children,d=document.getElementById('tcDots'),n=sl.length,cur=0,timer;
 for(var i=0;i<n;i++){(function(i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Cảm nhận '+(i+1));b.onclick=function(){go(i);stop()};d.appendChild(b)})(i)}

@@ -7,11 +7,15 @@
  *   POST /api/orders                      create an order, returns VietQR payment info
  *   GET  /api/admin/orders.csv            export orders (Bearer ADMIN_TOKEN or ?token=)
  *   GET  /api/admin/orders                same, as JSON
- *   POST /api/admin/orders/:code/status   { "status": "paid" | "cancelled" | "shipped" | "pending" }
+ *   POST /api/admin/orders/:code/status   { "status": "paid" | "shipped" | "delivered" | "cancelled" | "pending",
+ *                                           "carrier"?: "...", "shippingRef"?: "..." }
+ *                                         → marking "paid" creates a tracking code and emails it to the buyer
+ *   POST /api/admin/orders/:code/resend-email   send the tracking email again
+ *   GET  /api/track?code=HLXXXXXXXX       public order tracking (no personal data returned)
  */
 
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
-const STATUSES = ["pending", "paid", "shipped", "cancelled"];
+const STATUSES = ["pending", "paid", "shipped", "delivered", "cancelled"];
 const RECIPIENT_TYPES = ["Chính mình", "Mẹ", "Vợ", "Chị em, bạn bè", "Đồng nghiệp", "Khác"];
 
 export default {
@@ -23,7 +27,8 @@ export default {
       if (pathname === "/api/config" && request.method === "GET") return json(publicConfig(env));
       if (pathname === "/api/referral" && request.method === "GET") return handleReferral(url, env);
       if (pathname === "/api/orders" && request.method === "POST") return handleCreateOrder(request, env, ctx);
-      if (pathname.startsWith("/api/admin/")) return handleAdmin(request, url, env);
+      if (pathname === "/api/track" && request.method === "GET") return handleTrack(url, env);
+      if (pathname.startsWith("/api/admin/")) return handleAdmin(request, url, env, ctx);
       if (pathname.startsWith("/api/")) return json({ error: "Not found" }, 404);
     } catch (err) {
       console.error(err);
@@ -126,7 +131,8 @@ async function handleCreateOrder(request, env, ctx) {
 
   const transferNote = `${transferPrefix} ${orderCode}`;
   const payment = buildPayment(env, total, transferNote);
-  const result = { orderCode, total, transferNote, qrUrl: payment.qrUrl, bank: payment.bankLabel };
+  const result = { orderCode, total, transferNote, qrUrl: payment.qrUrl, bank: payment.bankLabel,
+    bankName: env.BANK_NAME || null, accountNo: env.BANK_ACCOUNT_NO || null, accountName: env.BANK_ACCOUNT_NAME || null };
 
   // Optional: push a notification (Google Apps Script, Slack, Zapier, Make, n8n…)
   if (env.NOTIFY_WEBHOOK_URL) {
@@ -175,31 +181,88 @@ function validate(b, c) {
   return { order: o };
 }
 
-/* ---------------- payment (VietQR) ---------------- */
+/* ---------------- payment ---------------- */
 
 function buildPayment(env, amount, note) {
-  if (!env.BANK_ID || !env.BANK_ACCOUNT_NO) return { qrUrl: env.STATIC_QR_URL || null, bankLabel: null };
+  const bankLabel = [env.BANK_NAME || (env.BANK_ID || "").toUpperCase(), env.BANK_ACCOUNT_NO, env.BANK_ACCOUNT_NAME].filter(Boolean).join(" · ") || null;
+  // A fixed QR image (e.g. the bank app's own QR) takes priority when STATIC_QR_URL is set
+  if (env.STATIC_QR_URL || !env.BANK_ID || !env.BANK_ACCOUNT_NO) return { qrUrl: env.STATIC_QR_URL || null, bankLabel };
   const tpl = env.VIETQR_TEMPLATE || "compact2";
   const qs = new URLSearchParams({ amount: String(amount), addInfo: note });
   if (env.BANK_ACCOUNT_NAME) qs.set("accountName", env.BANK_ACCOUNT_NAME);
   const qrUrl = `https://img.vietqr.io/image/${encodeURIComponent(env.BANK_ID)}-${encodeURIComponent(env.BANK_ACCOUNT_NO)}-${tpl}.png?${qs}`;
-  const bankLabel = [env.BANK_NAME || env.BANK_ID.toUpperCase(), env.BANK_ACCOUNT_NO, env.BANK_ACCOUNT_NAME].filter(Boolean).join(" · ");
   return { qrUrl, bankLabel };
+}
+
+/* ---------------- public tracking ---------------- */
+
+async function handleTrack(url, env) {
+  const code = String(url.searchParams.get("code") || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!/^HL[A-Z0-9]{8}$/.test(code)) return json({ error: "Mã theo dõi gồm 10 ký tự, bắt đầu bằng HL." }, 400);
+  const o = await env.DB.prepare(
+    `SELECT order_code, tracking_code, status, quantity, signed, ship_to_recipient, created_at, paid_at, shipped_at,
+            delivered_at, cancelled_at, carrier, shipping_ref FROM orders WHERE tracking_code = ?1`
+  ).bind(code).first();
+  if (!o) return json({ error: "Không tìm thấy đơn hàng với mã theo dõi này." }, 404);
+  return json({
+    orderCode: o.order_code, trackingCode: o.tracking_code, status: o.status, quantity: o.quantity,
+    signed: !!o.signed, shipToRecipient: !!o.ship_to_recipient, carrier: o.carrier || null, shippingRef: o.shipping_ref || null,
+    timeline: { created: iso(o.created_at), paid: iso(o.paid_at), shipped: iso(o.shipped_at), delivered: iso(o.delivered_at), cancelled: iso(o.cancelled_at) },
+  });
+}
+
+function iso(sqlTime) {
+  return sqlTime ? sqlTime.replace(" ", "T") + "Z" : null;
 }
 
 /* ---------------- admin ---------------- */
 
-async function handleAdmin(request, url, env) {
+async function handleAdmin(request, url, env, ctx) {
   const auth = request.headers.get("authorization") || "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : url.searchParams.get("token") || "";
   if (!env.ADMIN_TOKEN || !(await safeEqual(token, env.ADMIN_TOKEN))) return json({ error: "Unauthorized" }, 401);
 
-  const m = url.pathname.match(/^\/api\/admin\/orders\/(HG[A-Z0-9]{6})\/status$/);
+  const m = url.pathname.match(/^\/api\/admin\/orders\/(HG[A-Z0-9]{6})\/(status|resend-email)$/);
   if (m && request.method === "POST") {
-    const { status } = await request.json().catch(() => ({}));
+    const orderCode = m[1];
+    const order = await env.DB.prepare("SELECT * FROM orders WHERE order_code = ?1").bind(orderCode).first();
+    if (!order) return json({ error: "Order not found" }, 404);
+
+    if (m[2] === "resend-email") {
+      if (!order.tracking_code) return json({ error: "Đơn chưa có mã theo dõi (chưa đánh dấu đã thanh toán)." }, 400);
+      const mail = await sendTrackingEmail(env, order, url);
+      await saveMailResult(env, orderCode, mail);
+      return json({ ok: mail.ok, orderCode, trackingCode: order.tracking_code, email: mail });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const status = body.status;
     if (!STATUSES.includes(status)) return json({ error: `status must be one of ${STATUSES.join(", ")}` }, 400);
-    const r = await env.DB.prepare("UPDATE orders SET status = ?1, updated_at = datetime('now') WHERE order_code = ?2").bind(status, m[1]).run();
-    return r.meta.changes ? json({ ok: true, orderCode: m[1], status }) : json({ error: "Order not found" }, 404);
+    const carrier = typeof body.carrier === "string" ? body.carrier.trim().slice(0, 60) : null;
+    const shippingRef = typeof body.shippingRef === "string" ? body.shippingRef.trim().slice(0, 80) : null;
+
+    let trackingCode = order.tracking_code;
+    const needsTracking = status !== "pending" && status !== "cancelled" && !trackingCode;
+    if (needsTracking) trackingCode = await newTrackingCode(env);
+
+    const stamp = { paid: "paid_at", shipped: "shipped_at", delivered: "delivered_at", cancelled: "cancelled_at" }[status];
+    const sets = ["status = ?1", "updated_at = datetime('now')", "tracking_code = ?2"];
+    if (stamp) sets.push(`${stamp} = COALESCE(${stamp}, datetime('now'))`);
+    // Moving forward implies the earlier steps happened too
+    if (status === "shipped" || status === "delivered") sets.push("paid_at = COALESCE(paid_at, datetime('now'))");
+    if (status === "delivered") sets.push("shipped_at = COALESCE(shipped_at, datetime('now'))");
+    sets.push("carrier = COALESCE(?4, carrier)", "shipping_ref = COALESCE(?5, shipping_ref)");
+    await env.DB.prepare(`UPDATE orders SET ${sets.join(", ")} WHERE order_code = ?3`)
+      .bind(status, trackingCode, orderCode, carrier, shippingRef).run();
+
+    // First time an order gets a tracking code → email it to the buyer
+    let email = null;
+    if (needsTracking) {
+      const fresh = await env.DB.prepare("SELECT * FROM orders WHERE order_code = ?1").bind(orderCode).first();
+      email = await sendTrackingEmail(env, fresh, url);
+      await saveMailResult(env, orderCode, email);
+    }
+    return json({ ok: true, orderCode, status, trackingCode, email });
   }
 
   if ((url.pathname === "/api/admin/orders" || url.pathname === "/api/admin/orders.csv") && request.method === "GET") {
@@ -215,10 +278,79 @@ async function handleAdmin(request, url, env) {
   return json({ error: "Not found" }, 404);
 }
 
+async function newTrackingCode(env) {
+  for (let i = 0; i < 5; i++) {
+    const code = "HL" + randomCode(8);
+    const hit = await env.DB.prepare("SELECT 1 FROM orders WHERE tracking_code = ?1").bind(code).first();
+    if (!hit) return code;
+  }
+  throw new Error("could not create tracking code");
+}
+
+async function saveMailResult(env, orderCode, mail) {
+  await env.DB.prepare(
+    "UPDATE orders SET email_sent_at = CASE WHEN ?1 THEN datetime('now') ELSE email_sent_at END, email_error = ?2 WHERE order_code = ?3"
+  ).bind(mail.ok ? 1 : 0, mail.ok ? null : String(mail.error).slice(0, 300), orderCode).run();
+}
+
+function siteUrl(env, url) {
+  return (env.SITE_URL || url.origin).replace(/\/$/, "");
+}
+
+/* Sends the "payment received + tracking code" email through Resend (https://resend.com). */
+async function sendTrackingEmail(env, o, url) {
+  if (!env.RESEND_API_KEY || !env.MAIL_FROM) return { ok: false, error: "Email chưa được cấu hình (RESEND_API_KEY / MAIL_FROM)." };
+  const site = siteUrl(env, url);
+  const link = `${site}/tra-cuu/?ma=${o.tracking_code}`;
+  const money = (n) => Number(n).toLocaleString("vi-VN").replace(/,/g, ".") + "đ";
+  const esc = (x) => String(x ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const to = o.ship_to_recipient ? `${esc(o.recipient_name)} (${esc(o.recipient_phone)})` : esc(o.name);
+  const subject = `Self Hiil đã nhận thanh toán đơn ${o.order_code} · Mã theo dõi ${o.tracking_code}`;
+  const html = `<!doctype html><html><body style="margin:0;background:#fbf7ef;font-family:Arial,Helvetica,sans-serif;color:#2b2622">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fbf7ef;padding:28px 12px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid #ebe1cf;border-radius:16px">
+<tr><td style="padding:30px 30px 8px">
+<p style="margin:0 0 6px;font-size:12px;letter-spacing:2px;color:#8a7f73;text-transform:uppercase">Hiilee Gift · 20/10</p>
+<h1 style="margin:0 0 14px;font-family:Georgia,serif;font-size:26px;color:#e43583">Cảm ơn bạn, Self Hiil đã nhận được thanh toán</h1>
+<p style="margin:0 0 18px;font-size:15px;line-height:1.6">Chào ${esc(o.name)},<br>Đơn quà của bạn đã được xác nhận. Self Hiil đang chuẩn bị, thắt ruy băng${o.signed ? " và xin chữ ký tác giả trên cả 3 cuốn sách" : ""} để giao quà kịp trước ngày 20/10.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fce8f1;border-radius:12px"><tr><td style="padding:18px 20px;text-align:center">
+<p style="margin:0 0 4px;font-size:13px;color:#8a7f73">Mã theo dõi đơn hàng</p>
+<p style="margin:0;font-size:28px;font-weight:bold;letter-spacing:3px;color:#c2236c">${o.tracking_code}</p>
+</td></tr></table>
+<p style="text-align:center;margin:22px 0"><a href="${link}" style="display:inline-block;background:#e43583;color:#ffffff;text-decoration:none;font-weight:bold;padding:13px 26px;border-radius:999px;font-size:15px">Theo dõi đơn hàng</a></p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.5;border-top:1px solid #ebe1cf">
+<tr><td style="padding:10px 0;color:#8a7f73">Mã đơn</td><td style="padding:10px 0;text-align:right">${o.order_code}</td></tr>
+<tr><td style="padding:10px 0;color:#8a7f73;border-top:1px solid #f3ecdf">Số bộ quà</td><td style="padding:10px 0;text-align:right;border-top:1px solid #f3ecdf">${o.quantity}</td></tr>
+<tr><td style="padding:10px 0;color:#8a7f73;border-top:1px solid #f3ecdf">Đã thanh toán</td><td style="padding:10px 0;text-align:right;border-top:1px solid #f3ecdf">${money(o.total)}</td></tr>
+<tr><td style="padding:10px 0;color:#8a7f73;border-top:1px solid #f3ecdf">Người nhận</td><td style="padding:10px 0;text-align:right;border-top:1px solid #f3ecdf">${to}</td></tr>
+<tr><td style="padding:10px 0;color:#8a7f73;border-top:1px solid #f3ecdf;vertical-align:top">Địa chỉ giao</td><td style="padding:10px 0;text-align:right;border-top:1px solid #f3ecdf">${esc(o.address)}</td></tr>
+</table>
+<p style="margin:18px 0 0;font-size:14px;line-height:1.6;color:#5c544c">Giao quà dự kiến <b>17–18/10/2026</b>. Bạn có thể xem trạng thái đơn bất kỳ lúc nào tại <a href="${site}/tra-cuu/" style="color:#c2236c">${site.replace(/^https?:\/\//, "")}/tra-cuu</a> với mã theo dõi ở trên.</p>
+</td></tr>
+<tr><td style="padding:22px 30px 28px;font-size:13px;line-height:1.6;color:#8a7f73">
+<i style="font-family:Georgia,serif;font-size:16px;color:#e43583">Trao một món quà. Gieo một hành trình trưởng thành.</i><br><br>
+Self Hiil · 99 Nguyễn Cửu Vân, P. Gia Định, HCM · Hotline +84 865 161 315 · hiila@selfhiil.com
+</td></tr></table></td></tr></table></body></html>`;
+  const text = `Chào ${o.name},\n\nSelf Hiil đã nhận được thanh toán cho đơn ${o.order_code}.\nMã theo dõi đơn hàng: ${o.tracking_code}\nTheo dõi tại: ${link}\n\nSố bộ quà: ${o.quantity}\nĐã thanh toán: ${money(o.total)}\nĐịa chỉ giao: ${o.address}\n\nGiao quà dự kiến 17–18/10/2026.\n\nSelf Hiil · Hotline +84 865 161 315 · hiila@selfhiil.com`;
+  try {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
+      body: JSON.stringify({ from: env.MAIL_FROM, to: [o.email], reply_to: env.MAIL_REPLY_TO || undefined, bcc: env.MAIL_BCC ? [env.MAIL_BCC] : undefined, subject, html, text }),
+    });
+    if (!r.ok) return { ok: false, error: `Resend ${r.status}: ${(await r.text()).slice(0, 200)}` };
+    const d = await r.json().catch(() => ({}));
+    return { ok: true, id: d.id || null, to: o.email };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
 function csv(rows) {
   const cols = ["order_code", "created_at", "status", "name", "phone", "email", "newsletter", "quantity", "recipient_type",
     "signed", "ship_to_recipient", "recipient_name", "recipient_phone", "address", "referral_code", "note",
-    "unit_price", "discount_per_set", "total"];
+    "unit_price", "discount_per_set", "total", "tracking_code", "paid_at", "shipped_at", "delivered_at", "cancelled_at",
+    "carrier", "shipping_ref", "email_sent_at", "email_error"];
   const esc = (v) => {
     const s = v == null ? "" : String(v);
     // Leading quote stops Excel from treating phone numbers as numbers / formulas

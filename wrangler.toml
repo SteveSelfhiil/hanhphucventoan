@@ -27,15 +27,24 @@ REFERRAL_CODES = "HanhNhan,YenDieu,KhanhLy,Sunshine,LeNhon,KimBao,TuyetNgan,Tran
 # "true" = accept ANY non-empty code (same as the mockup). Keep "false" in production.
 ACCEPT_ANY_REFERRAL = "false"
 
-# VietQR bank details for the payment QR (bank short name or BIN, see https://api.vietqr.io/v2/banks)
-BANK_ID = ""            # e.g. "vcb", "tcb", "mb", "970436"
-BANK_ACCOUNT_NO = ""
-BANK_ACCOUNT_NAME = ""  # e.g. "CONG TY TNHH SELF HIIL"
-BANK_NAME = ""          # label shown under the QR, e.g. "Vietcombank"
+# Payment: the company's own Techcombank QR (public/img/bank-qr.jpg) is shown after each order.
+# The bank details below are printed under the QR so customers can also transfer manually.
+STATIC_QR_URL = "/img/bank-qr.jpg"
+BANK_NAME = "Techcombank"
+BANK_ACCOUNT_NO = "1903 6328 0240 18"
+BANK_ACCOUNT_NAME = "CONG TY CO PHAN THUONG HIEU VAN HOA SELF HIIL"
+# Optional: to pre-fill the amount + transfer note in the QR instead, clear STATIC_QR_URL
+# and set BANK_ID = "tcb" (VietQR), with BANK_ACCOUNT_NO written without spaces.
+BANK_ID = ""
 VIETQR_TEMPLATE = "compact2"
-# Fallback if you'd rather upload a fixed QR image to /public/img (amount not pre-filled)
-STATIC_QR_URL = ""
+
+# Order tracking emails (sent when an order is marked "paid" in /admin)
+SITE_URL = "https://hanhphucventoan.com"
+MAIL_FROM = "Self Hiil <donhang@hanhphucventoan.com>"   # domain must be verified in Resend
+MAIL_REPLY_TO = "hiila@selfhiil.com"
+MAIL_BCC = ""                                           # optional: copy every email to this address
 
 # Secrets (set with `npx wrangler secret put <NAME>`, never commit them):
-#   ADMIN_TOKEN          required for /api/admin/*
+#   ADMIN_TOKEN          required for /admin and /api/admin/*
+#   RESEND_API_KEY       required to email tracking codes (https://resend.com → API Keys)
 #   NOTIFY_WEBHOOK_URL   optional — receives a JSON POST for every new order
