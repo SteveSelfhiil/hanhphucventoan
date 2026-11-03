@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tra cứu đơn hàng · Hiilee Gift</title>
+<meta name="description" content="Tra cứu trạng thái đơn hàng Hiilee Gift bằng mã theo dõi.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/site.css">
+<style>
+.track{max-width:640px;margin:0 auto;padding:56px 16px 80px;--red:#b3261e}
+.track h1{font-size:clamp(34px,5vw,44px);line-height:1.15;text-align:center;color:var(--pink);margin:0 0 10px}
+.track .sub{text-align:center;color:var(--ink-soft);margin:0 0 30px;font-size:15.5px}
+.track .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px 24px}
+.track form{display:flex;gap:10px}
+.track input{flex:1;min-width:0;font:600 17px 'Be Vietnam Pro',sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--ink);background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.track input:focus{outline:2px solid var(--pink);border-color:transparent}
+.track form button{font:600 15px 'Be Vietnam Pro',sans-serif;background:var(--pink);color:#fff;border:0;border-radius:999px;padding:0 26px;cursor:pointer}
+.track form button:hover{background:var(--pink-dark)}
+.track .hint{font-size:13px;color:var(--muted);margin:10px 2px 0}
+.track .err{color:var(--red);font-weight:500;font-size:14.5px;margin:14px 2px 0}
+.track .result{margin-top:22px}
+.track .head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.track .head .k{font-size:12.5px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.track .head .v{font-size:20px;font-weight:700;letter-spacing:1.5px}
+.track .badge{display:inline-block;padding:6px 14px;border-radius:999px;font-size:13.5px;font-weight:600;background:var(--pink-pale);color:var(--pink-dark)}
+.track .badge.done{background:var(--green-pale);color:var(--green)}.track .badge.cancel{background:#f6e3e1;color:var(--red)}
+.track ol.tl{list-style:none;margin:22px 0 0;padding:0}
+.track ol.tl li{position:relative;padding:0 0 22px 38px}
+.track ol.tl li:last-child{padding-bottom:0}
+.track ol.tl li::before{content:"";position:absolute;left:9px;top:22px;bottom:-2px;width:2px;background:var(--line)}
+.track ol.tl li:last-child::before{display:none}
+.track ol.tl .dot{position:absolute;left:0;top:2px;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);background:#fff}
+.track ol.tl li.on .dot{border-color:var(--pink);background:var(--pink);box-shadow:0 0 0 4px var(--pink-pale)}
+.track ol.tl li.on::before{background:var(--pink)}
+.track ol.tl li.cur .dot{animation:pulse 1.8s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(228,53,131,.12)}}
+.track ol.tl b{display:block;font-size:15.5px}
+.track ol.tl li:not(.on) b{color:var(--muted);font-weight:500}
+.track ol.tl span{font-size:13.5px;color:var(--ink-soft)}
+.track .meta{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:var(--ink-soft)}
+.track .meta div{display:flex;justify-content:space-between;gap:12px;padding:4px 0}.track .meta b{color:var(--ink);text-align:right}
+.track .foot{text-align:center;margin-top:30px;font-size:14px;color:var(--ink-soft)}
+.track .foot a{color:var(--pink-dark)}
+@media(max-width:480px){.track form{flex-direction:column}.track form button{padding:14px}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap sh-in">
+    <a class="sh-logo" href="/" aria-label="Trang chủ Hiilee Gift"><img src="/logo.svg" alt="HIILEE - Hạnh phúc vẹn toàn" width="108" height="54"></a>
+    <a class="sh-title" href="/">Hiilee Gift</a>
+    <a class="btn btn-solid sh-cta" href="/#dat-qua">Chọn mua</a>
+  </div>
+</header>
+<main class="track">
+  <h1>Tra cứu đơn hàng</h1>
+  <p class="sub">Nhập mã theo dõi Self Hiil đã gửi qua email sau khi nhận được thanh toán.</p>
+  <div class="card">
+    <form id="f">
+      <input id="ma" name="ma" placeholder="HLXXXXXXXX" maxlength="12" autocomplete="off" spellcheck="false" aria-label="Mã theo dõi" required>
+      <button id="go" type="submit">Tra cứu</button>
+    </form>
+    <p class="hint">Mã gồm 10 ký tự, bắt đầu bằng <b>HL</b>.</p>
+    <p class="err" id="err" hidden></p>
+    <div class="result" id="res" hidden>
+      <div class="head">
+        <div><div class="k">Mã đơn</div><div class="v" id="rOrder"></div></div>
+        <span class="badge" id="rBadge"></span>
+      </div>
+      <ol class="tl" id="tl"></ol>
+      <div class="meta" id="meta"></div>
+    </div>
+  </div>
+  <p class="foot">Cần hỗ trợ? Gọi <a href="tel:+84707017062">+84 707 017 062</a> hoặc email <a href="mailto:hiila@selfhiil.com">hiila@selfhiil.com</a></p>
+</main>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <a class="img-link" href="https://selfhiil.com/" target="_blank" rel="noopener"><img class="sh-logo-lg" src="/img/brand/selfhiil-logo.svg" alt="Self Hiil" width="96" height="96"></a>
+      <p class="co">Công ty Cổ phần Thương hiệu Văn hoá Self Hiil</p>
+      <p class="reg">Mã số doanh nghiệp: 0316467418 do Sở Kế hoạch và Đầu tư TP.HCM cấp ngày 07/09/2020.</p>
+      <div class="foot-logos">
+        <a class="img-link" href="https://www.facebook.com/truongnhahanhphuc.hiilee" target="_blank" rel="noopener"><img src="/logo.svg" alt="HIILEE - Hạnh phúc vẹn toàn" width="104" height="52"></a>
+        <a class="img-link" href="https://www.facebook.com/groups/hiileeworld" target="_blank" rel="noopener"><img src="/img/brand/tnhp.svg" alt="Trường nhà hạnh phúc" width="149" height="52"></a>
+      </div>
+      <p class="fl">“Cùng mọi người sớm tận hưởng hạnh phúc vẹn toàn”</p>
+    </div>
+    <div class="foot-col">
+      <ul class="contact">
+        <li><span>Trụ sở</span>24 Bùi Văn Ba, P. Tân Thuận, Tp. Hồ Chí Minh, Việt Nam</li>
+        <li><span>Địa điểm kinh doanh</span>99 Nguyễn Cửu Vân, P. Gia Định, HCM</li>
+        <li><span>Hotline</span><a href="tel:+84707017062">+84 707 017 062</a></li>
+        <li><span>Email</span><a href="mailto:hiila@selfhiil.com">hiila@selfhiil.com</a></li>
+        <li><span>Đơn hàng</span><a href="/tra-cuu/">Tra cứu đơn hàng</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h4>Chính sách</h4>
+      <ul class="foot-links">
+        <li><a href="/dieu-khoan-dich-vu/">Điều khoản dịch vụ &amp; Chính sách giao nhận</a></li>
+        <li><a href="/chinh-sach-bao-mat/">Chính sách bảo mật</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<script>
+var LABEL={pending:'Chờ thanh toán',paid:'Đã thanh toán · Đang chuẩn bị quà',shipped:'Đang giao quà',delivered:'Đã giao quà',cancelled:'Đã huỷ'};
+function t(iso){if(!iso)return'';var d=new Date(iso);return d.toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit',year:'numeric'})}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function show(o){
+  var prep=o.wrapping==='kraft'?'Đang đóng gói vào túi giấy kraft':'Đang đóng gói, thắt ruy băng';
+  prep+=o.signed?' và xin chữ ký tác giả trên tất cả sách.':'.';
+  var steps=[['created','Đã nhận đơn','Self Hiil đã ghi nhận đơn đặt sách của bạn.'],
+             ['paid','Đã nhận thanh toán',prep],
+             ['shipped','Đang giao quà',o.carrier||o.shippingRef?('Đơn vị vận chuyển: '+esc(o.carrier||'')+(o.shippingRef?' · Mã vận đơn: '+esc(o.shippingRef):'')):'Món quà đang trên đường đến người nhận.'],
+             ['delivered','Đã giao quà','Món quà đã đến tay người nhận. Cảm ơn bạn!']];
+  if(o.status==='cancelled')steps=[steps[0],['cancelled','Đơn đã huỷ','Liên hệ Self Hiil nếu bạn cần hỗ trợ.']];
+  var lastOn=-1;steps.forEach(function(s,i){if(o.timeline[s[0]])lastOn=i});
+  document.getElementById('tl').innerHTML=steps.map(function(s,i){var on=!!o.timeline[s[0]];
+    return '<li class="'+(on?'on':'')+(i===lastOn&&o.status!=='delivered'&&o.status!=='cancelled'?' cur':'')+'"><span class="dot"></span><b>'+s[1]+'</b><span>'+(on?t(o.timeline[s[0]])+' · ':'')+s[2]+'</span></li>'}).join('');
+  document.getElementById('rOrder').textContent=o.orderCode;
+  var b=document.getElementById('rBadge');b.textContent=LABEL[o.status]||o.status;b.className='badge'+(o.status==='delivered'?' done':o.status==='cancelled'?' cancel':'');
+  var items=(o.items||[]).map(function(i){return i.qty+' × '+esc(i.name)}).join('<br>');
+  document.getElementById('meta').innerHTML='<div><span>Mã theo dõi</span><b>'+o.trackingCode+'</b></div>'+(items?'<div><span>Sản phẩm</span><b>'+items+'</b></div>':'')+'<div><span>Thời gian giao</span><b>Trong vòng 72 giờ sau khi thanh toán</b></div>';
+  document.getElementById('res').hidden=false;
+}
+function lookup(code){
+  var err=document.getElementById('err'),btn=document.getElementById('go');err.hidden=true;document.getElementById('res').hidden=true;btn.disabled=true;
+  fetch('/api/track?code='+encodeURIComponent(code)).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})})
+  .then(function(x){if(!x.ok)throw new Error(x.j.error||'Không tra cứu được.');show(x.j);try{history.replaceState(null,'','?ma='+x.j.trackingCode)}catch(e){}})
+  .catch(function(e){err.textContent=e.message||'Có lỗi kết nối, bạn thử lại nhé.';err.hidden=false})
+  .finally(function(){btn.disabled=false});
+}
+document.getElementById('f').addEventListener('submit',function(e){e.preventDefault();var v=document.getElementById('ma').value.trim();if(v)lookup(v)});
+var q=new URLSearchParams(location.search).get('ma');if(q){document.getElementById('ma').value=q;lookup(q)}
+</script>
+</body>
+</html>

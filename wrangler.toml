@@ -1,0 +1,55 @@
+name = "hanhphucventoan"
+main = "src/worker.js"
+compatibility_date = "2026-09-01"
+
+# Static site (public/) + images. API routes run the Worker first.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+# D1 database created in the Cloudflare dashboard
+[[d1_databases]]
+binding = "DB"
+database_name = "hiilee-gift"
+database_id = "3ab5d10d-0153-4bb6-8ec9-6bbe3db2258c"
+
+[vars]
+# Prices in VND
+PRICE_COMBO = "389000"          # Bộ sách Trưởng thành + HIILEE-6PR
+PRICE_TRUONG_THANH = "270000"   # Sách "Trưởng thành"
+PRICE_HIILEE = "195000"         # Sách "HIILEE-6PR"
+REFERRAL_DISCOUNT = "20000"     # off each combo and each book when a referral code is used
+MAX_QUANTITY = "50"             # max per product line
+ORDER_DEADLINE = ""             # e.g. "2026-12-31T23:59:59+07:00" to stop taking orders; empty = always open
+TRANSFER_PREFIX = "HIILEE"
+
+# Referral codes: add rows to the referral_codes table, and/or list them here (comma-separated).
+# Not case-sensitive: "kimbao", "KimBao" and "KIMBAO" all work.
+REFERRAL_CODES = "HanhNhan,YenDieu,KhanhLy,Sunshine,LeNhon,KimBao,TuyetNgan,TrangLe,ThuHoai,ThanhVan,MinhThao,ThuyTrang,ThuanThao,DoanVien,MinhThu,MinhKy,PhuongThao,DuyDuc,MinhAnh,ThanhThao,MinhChau,NguyenAnh,VuNgoc,MongThuy,VuVy,HoaiNam,KimChi,KimThu,MyLinh,HangNguyen,YenHoang,MinhNguyet,DongThinh,PhuongTuyen,TheHung,BachMai,KhanhHa,ThuyLien,SelfHiil,TNHP,SH,HW,HLThuyLien,HPVT"
+# "true" = accept ANY non-empty code (same as the mockup). Keep "false" in production.
+ACCEPT_ANY_REFERRAL = "false"
+
+# Payment QR images from the Techcombank app, in public/img/qr/:
+#   1–3 combos only → bank-qr[-x2|-x3]-with-code.jpg / -without-code.jpg (amount already in the QR)
+#   anything else    → bank-qr-blank.jpg (customer types the amount shown on screen)
+# If PRICE_COMBO or REFERRAL_DISCOUNT changes, these images must be re-made in the bank app.
+QR_IMAGE_DIR = "/img/qr"
+BANK_NAME = "Techcombank"
+BANK_ACCOUNT_NO = "1903 6328 0240 18"
+BANK_ACCOUNT_NAME = "CONG TY CO PHAN THUONG HIEU VAN HOA SELF HIIL"
+# Optional: to generate a QR per order (exact amount + order code) instead, clear QR_IMAGE_DIR
+# and set BANK_ID = "tcb" (VietQR).
+BANK_ID = ""
+VIETQR_TEMPLATE = "compact2"
+
+# Order tracking emails (sent when an order is marked "paid" in /admin)
+SITE_URL = "https://hanhphucventoan.com"
+MAIL_FROM = "Self Hiil <donhang@hanhphucventoan.com>"   # domain must be verified in Resend
+MAIL_REPLY_TO = "hiila@selfhiil.com"
+MAIL_BCC = ""                                           # optional: copy every email to this address
+
+# Secrets (set with `npx wrangler secret put <NAME>`, never commit them):
+#   ADMIN_TOKEN          required for /admin and /api/admin/*
+#   RESEND_API_KEY       required to email tracking codes (https://resend.com → API Keys)
+#   NOTIFY_WEBHOOK_URL   optional — receives a JSON POST for every new order
